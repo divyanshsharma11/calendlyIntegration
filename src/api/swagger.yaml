@@ -81,3 +81,70 @@ paths:
         "500":
           description: "Server error"
       x-swagger-router-controller: "syncController"
+
+  /v1/events:
+    get:
+      tags:
+        - "Events"
+      summary: "List events from local database"
+      description: "Returns paginated events from DB with optional filters and sorting."
+      operationId: getEventsController
+      parameters:
+        - name: page
+          in: query
+          type: integer
+          required: false
+          default: 1
+        - name: limit
+          in: query
+          type: integer
+          required: false
+          default: 20
+        - name: startDate
+          in: query
+          type: string
+          format: date-time
+          required: false
+        - name: endDate
+          in: query
+          type: string
+          format: date-time
+          required: false
+        - name: sort
+          in: query
+          type: string
+          required: false
+          enum: ["asc", "desc"]
+          default: "desc"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Events fetched successfully"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "eventsController"
+
+  /v1/eventsById:
+    get:
+      tags:
+        - "Events"
+      summary: "Get event by ID"
+      description: "Fetch a single event from the local database using its ID."
+      operationId: getEventByIdController
+      parameters:
+        - name: id
+          in: query
+          required: true
+          type: string
+          description: "MongoDB _id of the event"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Event fetched successfully"
+        "404":
+          description: "Event not found"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "eventsController"

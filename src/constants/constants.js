@@ -42,6 +42,10 @@ const constants = {
       SYNC_EVENT_SERVICE: "SYNC_EVENT_SERVICE",
       FETCH_ALL_EVENTS: "FETCH_ALL_EVENTS",
     },
+    EVENTS: {
+      GET_EVENTS: "GET_EVENTS",
+      GET_EVENTS_BY_ID: "GET_EVENTS_BY_ID",
+    },
   },
 };
 

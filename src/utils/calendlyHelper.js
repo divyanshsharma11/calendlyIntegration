@@ -54,7 +54,7 @@ const fetchAllEvents = async ({ mode = "incremental", pageLimit = 5 }) => {
 
     logger.info(`accessToken || ${JSON.stringify(accessToken)}`);
 
-    const userUri = await fetchCurrentUser(accessToken);
+    const userUri = tokenDoc?.userURI;
 
     logger.info(`userUri || ${JSON.stringify(userUri)}`);
 

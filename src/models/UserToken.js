@@ -19,10 +19,18 @@ const UserTokenSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
+    userURI: {
+      type: String,
+      required: false, // PENDING make it true by changing logic
+    },
+    currentOrganisation: {
+      type: String,
+      required: false, // PENDING make it true by changing logic
+    },
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = mongoose.model("UserToken", UserTokenSchema);
+module.exports = mongoose.model("UserToken", UserTokenSchema, "UserToken");

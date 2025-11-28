@@ -21,7 +21,6 @@ const getAuthorizeBusiness = async () => {
     client_id: process.env.CALENDLY_CLIENT_ID,
     response_type: "code",
     redirect_uri: process.env.CALENDLY_REDIRECT_URI,
-    scope: "users:read scheduled_events:read organization:read",
   });
 
   const authorizeUrl = `${baseUrl}?${params.toString()}`;
@@ -71,7 +70,16 @@ const handleCallbackBusiness = async (query) => {
 
   logger.debug("Token exchange response received");
 
-  const saved = await saveTokens(tokens);
+  // --- Fetch authenticated user (to get user URI) ---
+  let userData = await fetchCurrentUser(tokens.access_token);
+
+  let dbPayload = {
+    tokens,
+    userURI: userData?.userURI,
+    currentOrganisation: userData?.current_organization,
+  };
+
+  const saved = await saveTokens(dbPayload);
 
   logger.info("Tokens saved successfully");
 
@@ -86,4 +94,19 @@ const handleCallbackBusiness = async (query) => {
 module.exports = {
   getAuthorizeBusiness,
   handleCallbackBusiness,
+};
+// --- Fetch authenticated user (to get user URI) ---
+const fetchCurrentUser = async (accessToken) => {
+  const response = await axios.get(
+    `${process.env.CALENDLY_API_BASE}/users/me`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }
+  );
+  let data = {
+    uri: response.data.resource.uri,
+    current_organization: response.data.resource.current_organization,
+  };
+
+  return data;
 };

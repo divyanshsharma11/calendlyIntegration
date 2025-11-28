@@ -6,10 +6,11 @@ const {
   METHODS,
 } = require("../../constants/constants");
 
-const saveTokens = async (tokens) => {
+const saveTokens = async (data) => {
   const logger = new Logger(
     `${ENTERING} ${SERVICE_METHOD} ${METHODS.AUTH.CALLBACK}`
   );
+  const { tokens, userURI, currentOrganisation } = data;
 
   logger.debug("Saving Calendly tokens to database");
 
@@ -20,7 +21,8 @@ const saveTokens = async (tokens) => {
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       expires_in: tokens.expires_in,
-      created_at: new Date(),
+      userURI: userURI,
+      currentOrganisation: currentOrganisation,
     },
     { upsert: true, new: true }
   );
