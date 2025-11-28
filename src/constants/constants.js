@@ -1,0 +1,48 @@
+const constants = {
+  ENTERING: "Entering to",
+  MIDDLEWARE: "Middleware",
+  SERVICE_METHOD: "Service Method",
+  CONTROLLER_METHOD: "Controller Method",
+  BUSINESS_METHOD: "Business Method",
+  UTILS: " Utils",
+  STATUS: {
+    SUCCESS: 200,
+    BAD_GATEWAY: 502,
+    UNAUTHORISED: 403,
+    PASSWORD_MISMATCH: 409,
+    USER_EXIST: 210,
+    SERVER_ERROR: 507,
+    NOT_FOUND: 506,
+    PAYLOAD_INVALID: 422,
+    NOT_ALLOWED: 508,
+  },
+
+  METHODS: {
+    MIDDLEWARES: {
+      ERROR_MIDDLEWARE: "ErrorMiddleWare",
+      AUTH_MIDDLEWARE: "AuthMiddleWare",
+      WEBHOOK_SIGNATURE: "WebhookSignatureMiddleware",
+    },
+    AUTH: {
+      AUTHORIZE_CONTROLLER: "AUTHORIZE_CONTROLLER",
+      AUTHORIZE_BUSINESS: "AUTHORIZE_BUSINESS",
+      CALLBACK: "AUTH_CALLBACK",
+    },
+    INFO_LOGS: {
+      AUTH_CALLBACK_START: "Processing Calendly OAuth callback",
+      AUTH_CALLBACK_SUCCESS: "Calendly OAuth tokens saved successfully",
+      AUTH_CALLBACK_ERROR: "Error processing Calendly callback",
+    },
+    UTILS: {
+      UTILS_RETRY: "RetryUtils",
+    },
+    SYNC: {
+      SYNC_EVENT_CONTROLLER: "SYNC_EVENT_CONTROLLER",
+      SYNC_EVENT_BUSINESS: "SYNC_EVENT_BUSINESS",
+      SYNC_EVENT_SERVICE: "SYNC_EVENT_SERVICE",
+      FETCH_ALL_EVENTS: "FETCH_ALL_EVENTS",
+    },
+  },
+};
+
+module.exports = constants;

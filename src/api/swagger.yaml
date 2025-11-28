@@ -1,0 +1,83 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: Calendly Integration
+  description: Backend APIs for managing data for Calendly
+
+basePath: /api
+schemes:
+  - http
+
+paths:
+  /v1/auth/authorize:
+    get:
+      tags:
+        - "Authentication"
+      summary: "Start Calendly OAuth Flow"
+      description: "Redirects user to Calendly's OAuth consent screen."
+      operationId: authorizeController
+      produces:
+        - "application/json"
+      parameters: []
+      responses:
+        "302":
+          description: "Redirect to Calendly OAuth"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "authController"
+
+  /v1/auth/callback:
+    get:
+      tags:
+        - "Authentication"
+      summary: "Calendly OAuth Callback"
+      description: "Receives the authorization code from Calendly and exchanges it for access/refresh tokens."
+      operationId: callbackController
+      produces:
+        - "application/json"
+      parameters:
+        - name: code
+          in: query
+          description: "Authorization code returned by Calendly"
+          required: true
+          type: string
+      responses:
+        "200":
+          description: "Tokens exchanged and saved successfully"
+        "400":
+          description: "Missing or invalid authorization code"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "authController"
+
+  /v1/sync/events:
+    get:
+      tags:
+        - "Sync"
+      summary: "Sync Calendly Events"
+      description: "Fetches scheduled events from Calendly, handles pagination, and stores them in the local database."
+      operationId: syncEventsController
+      produces:
+        - "application/json"
+      parameters:
+        - name: pageLimit
+          in: query
+          description: "Maximum number of pages to fetch"
+          required: false
+          type: integer
+          default: 5
+        - name: mode
+          in: query
+          description: "Sync mode: full or incremental"
+          required: false
+          type: string
+          enum: [full, incremental]
+          default: "incremental"
+      responses:
+        "200":
+          description: "Events synced successfully"
+        "400":
+          description: "Invalid parameters"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "syncController"
