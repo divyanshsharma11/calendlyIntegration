@@ -21,11 +21,11 @@ const UserTokenSchema = new mongoose.Schema(
     },
     userURI: {
       type: String,
-      required: false, // PENDING make it true by changing logic
+      required: false,
     },
     currentOrganisation: {
       type: String,
-      required: false, // PENDING make it true by changing logic
+      required: false,
     },
   },
   {

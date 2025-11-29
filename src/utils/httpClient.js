@@ -1,6 +1,7 @@
 const axios = require("axios");
 const UserToken = require("../../src/models/UserToken");
 const { Logger } = require("../../src/utils/logger");
+const { errorFormat } = require("../utils/response");
 const {
   ENTERING,
   SERVICE_METHOD,
@@ -11,23 +12,32 @@ const { calendlyRequest } = require("./httpClient");
 
 // --- Fetch ONE page of scheduled events ---
 const fetchEventsPage = async (accessToken, userUri, nextCursor = null) => {
-  const params = {
-    count: 20,
-    user: userUri,
-  };
+  const logger = new Logger(
+    `${ENTERING} ${UTILS} ${METHODS.SYNC.FETCH_EVENTS_PAGE}`
+  );
 
-  if (nextCursor) params.page_token = nextCursor;
+  try {
+    const params = {
+      count: 20,
+      user: userUri,
+    };
 
-  const response = await calendlyRequest({
-    method: "GET",
-    url: "/scheduled_events",
-    params,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+    if (nextCursor) params.page_token = nextCursor;
 
-  return response.data;
+    const response = await calendlyRequest({
+      method: "GET",
+      url: "/scheduled_events",
+      params,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    logger.error(`Error in fetchEventsPage: ${error.message}`);
+    return Promise.reject(errorFormat(error));
+  }
 };
 
 // --- Fetch ALL scheduled events with pagination ---
@@ -38,17 +48,16 @@ const fetchAllEvents = async ({ pageLimit = 5 }) => {
 
   try {
     logger.info(` pageLimit | ${pageLimit}`);
+
     const tokenDoc = await UserToken.findOne().lean();
     if (!tokenDoc?.access_token) {
       throw new Error("Missing OAuth access token");
     }
 
     const accessToken = tokenDoc.access_token;
+    const userUri = tokenDoc.userURI;
 
     logger.info(`accessToken || ${JSON.stringify(accessToken)}`);
-
-    const userUri = tokenDoc?.userURI;
-
     logger.info(`userUri || ${JSON.stringify(userUri)}`);
 
     let allEvents = [];
@@ -75,9 +84,10 @@ const fetchAllEvents = async ({ pageLimit = 5 }) => {
     return allEvents;
   } catch (error) {
     logger.error(`Calendly Fetch Events Error | ${error.message}`);
-    throw error;
+    return Promise.reject(errorFormat(error));
   }
 };
+
 const createWebhookSubscription = async (accessToken, payload) => {
   const logger = new Logger(
     `${ENTERING} ${UTILS} ${METHODS.WEBHOOKS.CREATE_WEBHOOK_SUBSCRIPTION}`
@@ -107,7 +117,7 @@ const createWebhookSubscription = async (accessToken, payload) => {
         error?.response?.data
       )}`
     );
-    throw error;
+    return Promise.reject(errorFormat(error));
   }
 };
 

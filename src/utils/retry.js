@@ -1,4 +1,4 @@
-const { ENTERING, METHODS } = require("../constants/constants");
+const { ENTERING, METHODS, UTILS } = require("../constants/constants");
 const { Logger } = require("./logger");
 
 /**

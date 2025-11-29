@@ -1,4 +1,5 @@
 const { Logger } = require("../../utils/logger");
+const { sendResponse, errorFormat } = require("../../utils/response");
 const {
   ENTERING,
   BUSINESS_METHOD,
@@ -8,17 +9,17 @@ const {
 const { bulkUpsertEventsService } = require("../service/syncService");
 const { fetchAllEvents } = require("../../utils/calendlyHelper");
 
-const syncEventsBusiness = async (query) => {
+const syncEventsBusiness = async (payload) => {
   const logger = new Logger(
     `${ENTERING} ${BUSINESS_METHOD} ${METHODS.SYNC.SYNC_EVENT_BUSINESS}`
   );
 
   try {
-    logger.info(` query | ${JSON.stringify(query)}`);
-    const mode = query.mode || "incremental";
-    const pageLimit = parseInt(query.pageLimit || 5, 10);
+    logger.info(` payload | ${JSON.stringify(payload)}`);
 
-    const allEvents = await fetchAllEvents({ mode, pageLimit });
+    const pageLimit = parseInt(payload.pageLimit || 5, 10);
+
+    const allEvents = await fetchAllEvents({ pageLimit });
 
     logger.info(` allEvents | ${JSON.stringify(allEvents)}`);
 
@@ -44,27 +45,26 @@ const syncEventsBusiness = async (query) => {
         },
       };
     });
+
     logger.info(` bulkOps | ${JSON.stringify(bulkOps)}`);
 
     await bulkUpsertEventsService(bulkOps);
 
-    return {
-      status: 200,
-      success: true,
-      message: "Events synced successfully",
-      data: {
-        totalEventsFetched: allEvents.length,
-        totalEventsUpserted: bulkOps.length,
-      },
-    };
+    return sendResponse(true, 200, "Events synced successfully", {
+      totalEventsFetched: allEvents.length,
+      totalEventsUpserted: bulkOps.length,
+    });
   } catch (error) {
-    logger.error(`Sync Events Business Error | ${error.message}`);
+    const formatted = errorFormat(error);
+    logger.error(`Sync Events Business Error | ${formatted.message}`);
 
-    return {
-      status: 500,
-      success: false,
-      message: "Internal Server Error",
-    };
+    return sendResponse(
+      false,
+      formatted.status || 500,
+      "Internal Server Error",
+      null,
+      formatted
+    );
   }
 };
 
