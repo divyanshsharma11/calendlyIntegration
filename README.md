@@ -5,30 +5,6 @@ This service implements OAuth2 authentication, event syncing, webhook processing
 
 ---
 
-## 📐 Architecture Diagram (ASCII)
-
-                      Calendly API
-                          │
-                          ▼
-                ┌────────────────────────┐
-                │ Express Server (API)   │
-                └─────────┬──────────────┘
-                          │
-                 Swagger → Controllers → Business → Services → MongoDB
-                          │
-                          ▼
-                ┌──────────────────────┐
-                │ /webhooks/receive    │
-                └──────────┬───────────┘
-                           │ queue job
-                           ▼
-                   ┌──────────────┐
-                   │ BullMQ Worker│
-                   └───────┬──────┘
-                           ▼
-                        MongoDB
-
-
 ## 🧠 Design Decisions & Trade-offs
 
 ### 1. Chosen Third-Party API: Calendly
@@ -302,7 +278,28 @@ Worker responsibilities:
 
 ## **Worker is run locally**, since Render workers require a paid plan.
 
-                        
+## 📐 Architecture Diagram (ASCII)
+
+                      Calendly API
+                          │
+                          ▼
+                ┌────────────────────────┐
+                │ Express Server (API)   │
+                └─────────┬──────────────┘
+                          │
+                 Swagger → Controllers → Business → Services → MongoDB
+                          │
+                          ▼
+                ┌──────────────────────┐
+                │ /webhooks/receive    │
+                └──────────┬───────────┘
+                           │ queue job
+                           ▼
+                   ┌──────────────┐
+                   │ BullMQ Worker│
+                   └───────┬──────┘
+                           ▼
+                        MongoDB
 
 ---
 
@@ -401,3 +398,53 @@ GET /v1/auth/callback?code=xxxx
   "message": "Webhook logged and queued"
 }
 ```
+
+## 🐳 Docker Setup
+
+This project includes full Docker support for running the API server, the background worker, and required dependencies (MongoDB + Redis).  
+This enables a complete isolated environment matching a real integration service setup.
+
+### 1. Dockerfile (API Service)
+
+The main application is containerized using a lightweight Node.js Alpine image.  
+It installs dependencies, copies source code, exposes port `5000`, and runs the server.
+
+### 2. Worker Dockerfile
+
+A separate Dockerfile is included for the BullMQ worker.  
+It runs the webhook processing pipeline independently from the API service.
+
+### 3. Docker Compose
+
+`docker-compose.yml` orchestrates the entire system:
+
+- **api** → Main Calendly integration API
+- **worker** → Background webhook processor
+- **mongo** → Database for synced events and tokens
+- **redis** → Message queue backend for BullMQ
+
+Each service shares the same environment variables and starts in dependency order.
+
+### 4. Build & Run
+
+Build all services:
+
+```bash
+docker-compose build
+```
+
+### Run the entire stack (API + Worker + MongoDB + Redis):
+          docker-compose up
+
+### Stop containers
+        docker-compose down
+
+### Run in detached mode
+        docker-compose up -d
+
+### View logs
+        docker-compose logs -f app
+
+### Run everything (API + Worker + DB + Redis):
+        docker-compose up
+
