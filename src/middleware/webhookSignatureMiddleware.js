@@ -12,7 +12,10 @@ function webhookSignatureMiddleware(req, res, next) {
   );
 
   try {
-    if (!req.path.includes("/v1/webhook")) {
+    if (
+      !req.path.includes("/v1/webhook") ||
+      req.path.includes("/v1/webhook/register")
+    ) {
       return next();
     }
 
@@ -22,6 +25,8 @@ function webhookSignatureMiddleware(req, res, next) {
         .status(500)
         .json(sendResponse(false, 500, "Webhook signing key not configured"));
     }
+
+    console.log("headers=========>", req.headers);
 
     const signature = (req.headers["calendly-webhook-signature"] || "").trim();
     if (!signature) {

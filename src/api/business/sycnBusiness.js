@@ -8,8 +8,6 @@ const {
 const { bulkUpsertEventsService } = require("../service/syncService");
 const { fetchAllEvents } = require("../../utils/calendlyHelper");
 
-// PENDING store user uri in userToken collection instead getting it evry time
-
 const syncEventsBusiness = async (query) => {
   const logger = new Logger(
     `${ENTERING} ${BUSINESS_METHOD} ${METHODS.SYNC.SYNC_EVENT_BUSINESS}`

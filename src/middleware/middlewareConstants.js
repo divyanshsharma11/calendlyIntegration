@@ -8,6 +8,7 @@ const constants = {
     "/api/v1/auth/authorize",
     "/api/v1/auth/callback",
     "/api/v1/webhook",
+    "api/v1/webhooks/register",
     "/api/v1/sync/events", // to be removed
     "/api/v1/events", // to be removed
   ],

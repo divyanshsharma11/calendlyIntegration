@@ -148,3 +148,43 @@ paths:
         "500":
           description: "Server error"
       x-swagger-router-controller: "eventsController"
+
+  /v1/webhook/register:
+    post:
+      tags:
+        - "Webhooks"
+      summary: "Register Calendly webhook subscription"
+      description: "Creates a webhook subscription in Calendly for the authenticated user's organization."
+      operationId: registerWebhookController
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Webhook subscription created successfully"
+        "400":
+          description: "Missing token or organization details"
+        "401":
+          description: "Unauthorized"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "webhookController"
+
+  /v1/webhooks/receive:
+    post:
+      tags:
+        - "Webhooks"
+      summary: "Receive Calendly webhook events"
+      description: "Webhook receiver endpoint for Calendly. Validates signature, logs payloads, and queues events for processing."
+      operationId: receiveWebhookController
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Webhook received successfully"
+        "400":
+          description: "Invalid webhook payload"
+        "401":
+          description: "Invalid or missing signature"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "webhookController"

@@ -32,6 +32,13 @@ const saveTokens = async (data) => {
   return saved;
 };
 
+const getLatestUserToken = async () => {
+  const logger = new Logger(
+    `${ENTERING} ${SERVICE_METHOD} ${METHODS.AUTH.USER_TOKEN}`
+  );
+  return await UserToken.findOne().sort({ createdAt: -1 }).lean();
+};
 module.exports = {
   saveTokens,
+  getLatestUserToken,
 };
