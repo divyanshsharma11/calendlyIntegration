@@ -5,6 +5,30 @@ This service implements OAuth2 authentication, event syncing, webhook processing
 
 ---
 
+## 📐 Architecture Diagram (ASCII)
+
+                      Calendly API
+                          │
+                          ▼
+                ┌────────────────────────┐
+                │ Express Server (API)   │
+                └─────────┬──────────────┘
+                          │
+                 Swagger → Controllers → Business → Services → MongoDB
+                          │
+                          ▼
+                ┌──────────────────────┐
+                │ /webhooks/receive    │
+                └──────────┬───────────┘
+                           │ queue job
+                           ▼
+                   ┌──────────────┐
+                   │ BullMQ Worker│
+                   └───────┬──────┘
+                           ▼
+                        MongoDB
+
+
 ## 🧠 Design Decisions & Trade-offs
 
 ### 1. Chosen Third-Party API: Calendly
@@ -278,28 +302,7 @@ Worker responsibilities:
 
 ## **Worker is run locally**, since Render workers require a paid plan.
 
-## 📐 Architecture Diagram (ASCII)
-
-                      Calendly API
-                          │
-                          ▼
-                ┌────────────────────────┐
-                │ Express Server (API)   │
-                └─────────┬──────────────┘
-                          │
-                 Swagger → Controllers → Business → Services → MongoDB
-                          │
-                          ▼
-                ┌──────────────────────┐
-                │ /webhooks/receive    │
-                └──────────┬───────────┘
-                           │ queue job
-                           ▼
-                   ┌──────────────┐
-                   │ BullMQ Worker│
-                   └───────┬──────┘
-                           ▼
-                        MongoDB
+                        
 
 ---
 
