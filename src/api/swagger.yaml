@@ -7,6 +7,11 @@ info:
 basePath: /api
 schemes:
   - http
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-api-key
 
 paths:
   /v1/auth/authorize:
@@ -18,6 +23,8 @@ paths:
       operationId: authorizeController
       produces:
         - "application/json"
+      security:
+        - ApiKeyAuth: []
       parameters: []
       responses:
         "302":
@@ -82,35 +89,36 @@ paths:
   /v1/events:
     get:
       tags:
-        - "Events"
+        - "Local Events"
       summary: "List events from local database"
-      description: "Returns paginated events from DB with optional filters and sorting."
+      description: "Returns paginated events stored locally in MongoDB (NOT fetched from Calendly)."
       operationId: getEventsController
+      security:
+        - ApiKeyAuth: []
       parameters:
+        - name: x-api-key
+          in: header
+          required: true
+          type: string
         - name: page
           in: query
           type: integer
-          required: false
           default: 1
         - name: limit
           in: query
           type: integer
-          required: false
           default: 20
         - name: startDate
           in: query
           type: string
           format: date-time
-          required: false
         - name: endDate
           in: query
           type: string
           format: date-time
-          required: false
         - name: sort
           in: query
           type: string
-          required: false
           enum: ["asc", "desc"]
           default: "desc"
       produces:
@@ -118,6 +126,8 @@ paths:
       responses:
         "200":
           description: "Events fetched successfully"
+        "401":
+          description: "Unauthorized"
         "500":
           description: "Server error"
       x-swagger-router-controller: "eventsController"
@@ -125,11 +135,17 @@ paths:
   /v1/eventsById:
     get:
       tags:
-        - "Events"
-      summary: "Get event by ID"
-      description: "Fetch a single event from the local database using its ID."
+        - "Local Events"
+      summary: "Get event by ID from local DB"
+      description: "Fetch a single event stored locally (NOT fetched from Calendly)."
       operationId: getEventByIdController
+      security:
+        - ApiKeyAuth: []
       parameters:
+        - name: x-api-key
+          in: header
+          required: true
+          type: string
         - name: id
           in: query
           required: true
@@ -140,6 +156,8 @@ paths:
       responses:
         "200":
           description: "Event fetched successfully"
+        "401":
+          description: "Unauthorized"
         "404":
           description: "Event not found"
         "500":

@@ -18,6 +18,13 @@ async function authMiddleware(req, res, next) {
       logger.debug(`Swagger route accessed: ${path}`);
       return next();
     }
+    const clientKey = req.headers["x-api-key"];
+    const serverKey = process.env.API_KEY;
+
+    if (clientKey && clientKey === serverKey) {
+      logger.debug(`API key present for route : ${path}`);
+      return next();
+    }
     logger.error(`Blocked unauthorized access to: ${path}`);
     return res.status(401).json({
       success: false,

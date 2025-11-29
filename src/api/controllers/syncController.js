@@ -1,5 +1,6 @@
 const { syncEventsBusiness } = require("../business/sycnBusiness");
 const { Logger } = require("../../utils/logger");
+const { errorFormat } = require("../../utils/response");
 const {
   ENTERING,
   CONTROLLER_METHOD,
@@ -27,9 +28,13 @@ const syncEventsController = async (req, res, next) => {
     logger.info(` response | ${JSON.stringify(response)}`);
 
     return res.status(response.status).json(response);
-  } catch (err) {
-    logger.error(`Sync Events Controller Error | ${err.message}`);
-    return next(err);
+  } catch (error) {
+    const formatted = errorFormat(error);
+    logger.error(`Error in syncEventsController: ${formatted.message}`);
+
+    return res
+      .status(formatted.status || 500)
+      .json({ success: false, message: formatted.message, error: formatted });
   }
 };
 

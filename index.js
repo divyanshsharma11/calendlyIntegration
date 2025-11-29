@@ -57,10 +57,11 @@ app.use(errorMiddleware);
 
 // ===== Start Server =====
 const PORT = process.env.PORT || 5000;
+const URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
 
 server.listen(PORT, () => {
-  logger.info(`Server running at http://localhost:${PORT}`);
-  logger.info(`Swagger UI available at http://localhost:${PORT}/api/docs`);
+  logger.info(`Server running at ${URL}`);
+  logger.info(`Swagger UI available at ${URL}/api/docs`);
 });
 
 module.exports = app;
