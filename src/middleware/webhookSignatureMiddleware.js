@@ -10,7 +10,6 @@ function webhookSignatureMiddleware(req, res, next) {
   const logger = new Logger(
     `${ENTERING} ${MIDDLEWARE} ${METHODS.MIDDLEWARES.WEBHOOK_SIGNATURE}`
   );
-
   try {
     if (
       !req.path.includes("/v1/webhook") ||
@@ -18,7 +17,15 @@ function webhookSignatureMiddleware(req, res, next) {
     ) {
       return next();
     }
+    const signatureHeader = req.headers["calendly-webhook-signature"];
+    if (!signatureHeader) {
+      logger.error("Missing Calendly-Webhook-Signature header");
+      return res
+        .status(401)
+        .json(sendResponse(false, 401, "Invalid webhook signature"));
+    }
 
+    const SIGNING_KEY = process.env.CALENDLY_WEBHOOK_SIGNING_KEY;
     if (!SIGNING_KEY) {
       logger.error("Missing CALENDLY_WEBHOOK_SIGNING_KEY");
       return res
@@ -26,54 +33,49 @@ function webhookSignatureMiddleware(req, res, next) {
         .json(sendResponse(false, 500, "Webhook signing key not configured"));
     }
 
-    console.log("headers=========>", req.headers);
-
-    const signature = (req.headers["calendly-webhook-signature"] || "").trim();
-    if (!signature) {
-      logger.error("Missing Calendly-Webhook-Signature header");
-      return res
-        .status(401)
-        .json(sendResponse(false, 401, "Invalid webhook signature"));
-    }
-
     const rawBody = req.rawBody;
     if (!rawBody) {
-      logger.error("Missing raw body for signature validation");
-      return res.status(400).json(sendResponse(false, 400, "Raw body missing"));
+      return res
+        .status(400)
+        .json({ success: false, message: "Raw body missing" });
     }
 
-    // Compute HMAC SHA256
-    const computedHex = crypto
+    const parts = signatureHeader.split(",");
+    const timestamp = parts.find((p) => p.startsWith("t="))?.split("=")[1];
+    const signature = parts.find((p) => p.startsWith("v1="))?.split("=")[1];
+
+    if (!timestamp || !signature) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid signature header format" });
+    }
+
+    const signedPayload = `${timestamp}.${rawBody}`;
+
+    const expectedSignature = crypto
       .createHmac("sha256", SIGNING_KEY)
-      .update(rawBody)
+      .update(signedPayload)
       .digest("hex");
 
-    // Safe constant-time compare
-    let computedBuf, receivedBuf;
-    try {
-      computedBuf = Buffer.from(computedHex, "hex");
-      receivedBuf = Buffer.from(signature, "hex");
-    } catch {
-      logger.error("Signature format invalid (not hex)");
-      return res
-        .status(401)
-        .json(sendResponse(false, 401, "Invalid webhook signature"));
-    }
+    const expectedBuf = Buffer.from(expectedSignature, "hex");
+    const receivedBuf = Buffer.from(signature, "hex");
 
     if (
-      computedBuf.length !== receivedBuf.length ||
-      !crypto.timingSafeEqual(computedBuf, receivedBuf)
+      expectedBuf.length !== receivedBuf.length ||
+      !crypto.timingSafeEqual(expectedBuf, receivedBuf)
     ) {
-      logger.error(
-        `Webhook signature mismatch | expected: ${signature} | computed: ${computedHex}`
-      );
-      return res
-        .status(401)
-        .json(sendResponse(false, 401, "Invalid webhook signature"));
+      {
+        logger.error(
+          `Webhook signature mismatch | expected: ${signature} | computed: ${computedHex}`
+        );
+        return res
+          .status(401)
+          .json(sendResponse(false, 401, "Invalid webhook signature"));
+      }
     }
-
     logger.info("Webhook signature validated successfully");
-    next();
+
+    return next();
   } catch (err) {
     const formatted = errorFormat(err);
     logger.error(`Webhook Signature Error: ${formatted.message}`);

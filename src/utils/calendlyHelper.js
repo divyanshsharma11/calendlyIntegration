@@ -29,13 +29,13 @@ const fetchEventsPage = async (accessToken, userUri, nextCursor = null) => {
 };
 
 // --- Fetch ALL scheduled events with pagination ---
-const fetchAllEvents = async ({ mode = "incremental", pageLimit = 5 }) => {
+const fetchAllEvents = async ({ pageLimit = 5 }) => {
   const logger = new Logger(
     `${ENTERING} ${UTILS} ${METHODS.SYNC.FETCH_ALL_EVENTS}`
   );
 
   try {
-    logger.info(`mode | ${mode || " "} || pageLimit | ${pageLimit}`);
+    logger.info(` pageLimit | ${pageLimit}`);
     const tokenDoc = await UserToken.findOne().lean();
     if (!tokenDoc?.access_token) {
       throw new Error("Missing OAuth access token");

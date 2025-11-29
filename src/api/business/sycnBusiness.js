@@ -8,17 +8,16 @@ const {
 const { bulkUpsertEventsService } = require("../service/syncService");
 const { fetchAllEvents } = require("../../utils/calendlyHelper");
 
-const syncEventsBusiness = async (query) => {
+const syncEventsBusiness = async (payload) => {
   const logger = new Logger(
     `${ENTERING} ${BUSINESS_METHOD} ${METHODS.SYNC.SYNC_EVENT_BUSINESS}`
   );
 
   try {
-    logger.info(` query | ${JSON.stringify(query)}`);
-    const mode = query.mode || "incremental";
-    const pageLimit = parseInt(query.pageLimit || 5, 10);
+    logger.info(` payload | ${JSON.stringify(payload)}`);
+    const pageLimit = parseInt(payload.pageLimit || 5, 10);
 
-    const allEvents = await fetchAllEvents({ mode, pageLimit });
+    const allEvents = await fetchAllEvents({ pageLimit });
 
     logger.info(` allEvents | ${JSON.stringify(allEvents)}`);
 

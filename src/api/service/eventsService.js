@@ -48,8 +48,28 @@ const getEventByIdFromDB = async (id) => {
 
   return event;
 };
+const updateEventInDB = async (query, update, options = {}) => {
+  const logger = new Logger(
+    `${ENTERING} ${SERVICE_METHOD} ${METHODS.EVENTS.UPDATE_EVENT}`
+  );
+
+  logger.debug(
+    `Updating event in DB | query: ${JSON.stringify(
+      query
+    )} | update: ${JSON.stringify(update)} | options: ${JSON.stringify(
+      options
+    )}`
+  );
+
+  const result = await Event.updateOne(query, update, options);
+
+  logger.info("Event updated in DB successfully");
+
+  return result;
+};
 
 module.exports = {
   getEventsFromDB,
   getEventByIdFromDB,
+  updateEventInDB,
 };

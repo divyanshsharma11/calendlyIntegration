@@ -14,6 +14,7 @@ const {
 const { webhookQueue } = require("../../jobs/queue");
 const { createWebhookSubscription } = require("../../utils/calendlyHelper");
 const { getLatestUserToken } = require("../service/authService");
+const { getCache, setCache } = require("../../utils/redis");
 
 const registerWebhookBusiness = async () => {
   const logger = new Logger(
@@ -85,19 +86,37 @@ const handleWebhookReceiveBusiness = async (payload) => {
     }
 
     logger.debug(`Webhook payload received | ${JSON.stringify(payload)}`);
-
-    // Extract useful metadata
     const event = payload.event;
+    const inviteeUri = payload?.payload?.uri;
+
+    const inviteeUuid = inviteeUri.split("/").pop();
+    const redisKey = `calendly_${event}_${inviteeUuid}`;
+
+    const alreadyProcessed = await getCache(redisKey);
+
+    if (alreadyProcessed) {
+      logger.info(`Duplicate webhook ignored for invitee: ${inviteeUuid}`);
+
+      return sendResponse(
+        true,
+        200,
+        "Duplicate webhook ignored for invitee",
+        null
+      );
+    }
+
+    await setCache(redisKey, true, 86400); // 24 hours TTL
+
+    logger.info(`Processing Calendly webhook for invitee: ${inviteeUuid}`);
+
     const organization = payload.payload?.organization;
     const eventUri = payload.payload?.event || payload.payload?.scheduled_event;
 
-    // Save raw webhook log
     const logEntry = await saveWebhookLog({
       event,
       organization,
       eventUri,
       payload,
-      processed: false,
     });
 
     logger.info("Webhook log saved successfully");
@@ -106,7 +125,7 @@ const handleWebhookReceiveBusiness = async (payload) => {
     await webhookQueue.add("processWebhook", {
       logId: logEntry._id,
       event,
-      organization,
+      payload,
       eventUri,
     });
 

@@ -11,11 +11,26 @@ const syncEventsController = async (req, res, next) => {
     `${ENTERING} ${CONTROLLER_METHOD} ${METHODS.SYNC.SYNC_EVENT_CONTROLLER}`
   );
 
-  const response = await syncEventsBusiness(req.query);
+  try {
+    const body = req.body || {};
 
-  logger.info(` response | ${JSON.stringify(response)}`);
+    const pageLimit = Number.isFinite(Number(body.pageLimit))
+      ? parseInt(body.pageLimit, 10)
+      : 5;
 
-  return res.status(response.status).json(response);
+    const payload = { pageLimit };
+
+    logger.info(` request body | ${JSON.stringify(body)}`);
+
+    const response = await syncEventsBusiness(payload);
+
+    logger.info(` response | ${JSON.stringify(response)}`);
+
+    return res.status(response.status).json(response);
+  } catch (err) {
+    logger.error(`Sync Events Controller Error | ${err.message}`);
+    return next(err);
+  }
 };
 
 module.exports = {

@@ -53,5 +53,3 @@ module.exports = {
   sendResponse,
   errorFormat,
 };
-
-// PENDING -------------- ADD LOGGERS HERE

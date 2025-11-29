@@ -5,6 +5,11 @@ require("dotenv").config();
 const { Logger } = require("../utils/logger");
 const { ENTERING, JOBS, METHODS } = require("../constants/constants");
 const redisConfig = require("../config/redisConfig");
+const connectDB = require("../config/db");
+const { updateEventInDB } = require("../api/service/eventsService");
+const retry = require("../utils/retry");
+
+connectDB();
 
 const logger = new Logger(
   `${ENTERING} ${JOBS} ${METHODS.WEBHOOKS.WEBHOOK_PROCESSOR}`
@@ -15,7 +20,7 @@ const worker = new Worker(
   async (job) => {
     logger.info(`Processing webhook job | ${JSON.stringify(job.data)}`);
 
-    const { logId, event, organization, eventUri } = job.data;
+    const { logId, event } = job.data;
 
     const log = await WebhookLog.findById(logId);
     if (!log) {
@@ -24,15 +29,47 @@ const worker = new Worker(
     }
 
     try {
-      if (event === "invitee.created") {
-        logger.info("Processing invitee.created webhook");
-        // Future: fetch event from Calendly & upsert into DB
-      }
+      // WRAPPING MAIN PROCESSING IN RETRY
+      await retry(
+        async () => {
+          if (event === "invitee.created" || event === "invitee.canceled") {
+            logger.info(`Processing ${event} webhook`);
 
-      if (event === "invitee.canceled") {
-        logger.info("Processing invitee.canceled webhook");
-        // Future: mark event as canceled or re-sync event
-      }
+            const body = job.data;
+            const eventData = body?.payload?.payload?.scheduled_event;
+            const invitee = body?.payload?.payload;
+
+            if (!eventData || !invitee) return;
+
+            const eventId = eventData?.uri
+              ? eventData.uri.split("/").pop()
+              : undefined;
+
+            const update = {
+              $set: {
+                calendlyEventId: eventId,
+                name: eventData?.name,
+                status: eventData?.status,
+                startTime: eventData?.start_time,
+                endTime: eventData?.end_time,
+                eventType: eventData?.event_type,
+                location: eventData?.location,
+                raw: eventData,
+              },
+            };
+
+            const options = { upsert: true };
+
+            // Critical DB write wrapped in retry
+            await updateEventInDB(
+              { calendlyEventId: eventId },
+              update,
+              options
+            );
+          }
+        },
+        { retries: 3, delay: 300 } // optional overrides
+      );
 
       log.processed = true;
       await log.save();

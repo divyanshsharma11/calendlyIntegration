@@ -4,7 +4,10 @@ const {
   CONTROLLER_METHOD,
   METHODS,
 } = require("../../constants/constants");
-const { registerWebhookBusiness } = require("../business/webhookBusiness");
+const {
+  registerWebhookBusiness,
+  handleWebhookReceiveBusiness,
+} = require("../business/webhookBusiness");
 
 const registerWebhookController = async (req, res, next) => {
   const logger = new Logger(

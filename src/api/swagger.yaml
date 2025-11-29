@@ -51,7 +51,7 @@ paths:
       x-swagger-router-controller: "authController"
 
   /v1/sync/events:
-    get:
+    post:
       tags:
         - "Sync"
       summary: "Sync Calendly Events"
@@ -60,19 +60,16 @@ paths:
       produces:
         - "application/json"
       parameters:
-        - name: pageLimit
-          in: query
-          description: "Maximum number of pages to fetch"
+        - in: body
+          name: body
           required: false
-          type: integer
-          default: 5
-        - name: mode
-          in: query
-          description: "Sync mode: full or incremental"
-          required: false
-          type: string
-          enum: [full, incremental]
-          default: "incremental"
+          schema:
+            type: object
+            properties:
+              pageLimit:
+                type: integer
+                description: "Maximum number of pages to fetch"
+                default: 5
       responses:
         "200":
           description: "Events synced successfully"

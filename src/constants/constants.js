@@ -48,6 +48,7 @@ const constants = {
     EVENTS: {
       GET_EVENTS: "GET_EVENTS",
       GET_EVENTS_BY_ID: "GET_EVENTS_BY_ID",
+      UPDATE_EVENT: "UPDATE_EVENT",
     },
     WEBHOOKS: {
       REGISTER_WEBHOOK: "REGISTER_WEBHOOK",

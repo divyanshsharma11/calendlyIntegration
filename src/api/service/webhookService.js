@@ -5,6 +5,7 @@ const {
   SERVICE_METHOD,
   METHODS,
 } = require("../../constants/constants");
+const WebhookLog = require("../../models/WebhookLog");
 
 const saveWebhookSubscription = async (data) => {
   const logger = new Logger(
