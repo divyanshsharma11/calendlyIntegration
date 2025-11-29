@@ -1,0 +1,190 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: Calendly Integration
+  description: Backend APIs for managing data for Calendly
+
+basePath: /api
+schemes:
+  - http
+
+paths:
+  /v1/auth/authorize:
+    get:
+      tags:
+        - "Authentication"
+      summary: "Start Calendly OAuth Flow"
+      description: "Redirects user to Calendly's OAuth consent screen."
+      operationId: authorizeController
+      produces:
+        - "application/json"
+      parameters: []
+      responses:
+        "302":
+          description: "Redirect to Calendly OAuth"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "authController"
+
+  /v1/auth/callback:
+    get:
+      tags:
+        - "Authentication"
+      summary: "Calendly OAuth Callback"
+      description: "Receives the authorization code from Calendly and exchanges it for access/refresh tokens."
+      operationId: callbackController
+      produces:
+        - "application/json"
+      parameters:
+        - name: code
+          in: query
+          description: "Authorization code returned by Calendly"
+          required: true
+          type: string
+      responses:
+        "200":
+          description: "Tokens exchanged and saved successfully"
+        "400":
+          description: "Missing or invalid authorization code"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "authController"
+
+  /v1/sync/events:
+    get:
+      tags:
+        - "Sync"
+      summary: "Sync Calendly Events"
+      description: "Fetches scheduled events from Calendly, handles pagination, and stores them in the local database."
+      operationId: syncEventsController
+      produces:
+        - "application/json"
+      parameters:
+        - name: pageLimit
+          in: query
+          description: "Maximum number of pages to fetch"
+          required: false
+          type: integer
+          default: 5
+        - name: mode
+          in: query
+          description: "Sync mode: full or incremental"
+          required: false
+          type: string
+          enum: [full, incremental]
+          default: "incremental"
+      responses:
+        "200":
+          description: "Events synced successfully"
+        "400":
+          description: "Invalid parameters"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "syncController"
+
+  /v1/events:
+    get:
+      tags:
+        - "Events"
+      summary: "List events from local database"
+      description: "Returns paginated events from DB with optional filters and sorting."
+      operationId: getEventsController
+      parameters:
+        - name: page
+          in: query
+          type: integer
+          required: false
+          default: 1
+        - name: limit
+          in: query
+          type: integer
+          required: false
+          default: 20
+        - name: startDate
+          in: query
+          type: string
+          format: date-time
+          required: false
+        - name: endDate
+          in: query
+          type: string
+          format: date-time
+          required: false
+        - name: sort
+          in: query
+          type: string
+          required: false
+          enum: ["asc", "desc"]
+          default: "desc"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Events fetched successfully"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "eventsController"
+
+  /v1/eventsById:
+    get:
+      tags:
+        - "Events"
+      summary: "Get event by ID"
+      description: "Fetch a single event from the local database using its ID."
+      operationId: getEventByIdController
+      parameters:
+        - name: id
+          in: query
+          required: true
+          type: string
+          description: "MongoDB _id of the event"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Event fetched successfully"
+        "404":
+          description: "Event not found"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "eventsController"
+
+  /v1/webhook/register:
+    post:
+      tags:
+        - "Webhooks"
+      summary: "Register Calendly webhook subscription"
+      description: "Creates a webhook subscription in Calendly for the authenticated user's organization."
+      operationId: registerWebhookController
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Webhook subscription created successfully"
+        "400":
+          description: "Missing token or organization details"
+        "401":
+          description: "Unauthorized"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "webhookController"
+
+  /v1/webhooks/receive:
+    post:
+      tags:
+        - "Webhooks"
+      summary: "Receive Calendly webhook events"
+      description: "Webhook receiver endpoint for Calendly. Validates signature, logs payloads, and queues events for processing."
+      operationId: receiveWebhookController
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Webhook received successfully"
+        "400":
+          description: "Invalid webhook payload"
+        "401":
+          description: "Invalid or missing signature"
+        "500":
+          description: "Server error"
+      x-swagger-router-controller: "webhookController"
