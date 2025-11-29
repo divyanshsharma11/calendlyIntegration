@@ -23,8 +23,6 @@ paths:
       operationId: authorizeController
       produces:
         - "application/json"
-      security:
-        - ApiKeyAuth: []
       parameters: []
       responses:
         "302":
