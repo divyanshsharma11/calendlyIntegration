@@ -10,6 +10,7 @@ const constants = {
     "/api/v1/webhook",
     "/api/v1/webhooks/register",
     "/api/v1/webhooks/receive",
+    "/api/v1/sync/events",
   ],
 
   SWAGGER_ROUTES: [
