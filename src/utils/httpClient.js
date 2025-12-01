@@ -29,6 +29,29 @@ async function calendlyRequest(config) {
   );
 }
 
+async function calendlyOAuthRequest(config) {
+  return retry(
+    async () => {
+      logger.info(
+        JSON.stringify({
+          type: "CalendlyOAuthRequest",
+          method: config.method,
+          url: config.url,
+        })
+      );
+
+      const res = await oauthClient(config);
+      return res.data;
+    },
+    {
+      retries: 3,
+      delay: 300,
+      retryStatusCodes: [429, 500, 502, 503, 504],
+    }
+  );
+}
+
 module.exports = {
   calendlyRequest,
+  calendlyOAuthRequest,
 };
