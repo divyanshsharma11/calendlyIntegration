@@ -19,18 +19,17 @@ const { errorMiddleware } = require("./src/middleware/errorMiddleware");
 const app = express();
 const server = http.createServer(app);
 
-// === DB Connection ====
-connectDB();
-
 // == Capture raw body for Webhook Signature ==
-app.use(
-  express.json({
-    verify: (req, res, buf) => {
-      req.rawBody = buf;
-    },
-  })
-);
-
+app.use((req, res, next) => {
+  if (req.path.includes("webhook")) {
+    return express.json({
+      verify: (req, res, buf) => {
+        req.rawBody = buf;
+      },
+    })(req, res, next);
+  }
+  return express.json()(req, res, next);
+});
 app.use(cors());
 
 const swaggerDoc = YAML.load(path.join(__dirname, "./src/api/swagger.yaml"));
@@ -57,11 +56,18 @@ app.use(errorMiddleware);
 
 // ===== Start Server =====
 const PORT = process.env.PORT || 5000;
-const URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
+const URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}/`;
 
-server.listen(PORT, () => {
-  logger.info(`Server running at ${URL}`);
-  logger.info(`Swagger UI available at ${URL}api/docs`);
-});
+async function startServer() {
+  // === DB Connection ====
+  await connectDB();
+
+  server.listen(PORT, () => {
+    logger.info(`Server running at ${URL}`);
+    logger.info(`Swagger UI available at ${URL}api/docs`);
+  });
+}
+
+startServer();
 
 module.exports = app;
