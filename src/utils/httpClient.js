@@ -12,6 +12,10 @@ const calendlyClient = axios.create({
   baseURL: process.env.CALENDLY_API_BASE || "https://api.calendly.com",
   timeout: 15000,
 });
+// ---- Calendly OAuth Client (auth.calendly.com) ----
+const oauthClient = axios.create({
+  timeout: 15000, // no baseURL because token URL is absolute
+});
 
 // Wrapper to apply retry for ALL Calendly requests
 async function calendlyRequest(config) {
@@ -19,7 +23,7 @@ async function calendlyRequest(config) {
     async () => {
       logger.info(`Calendly API Request | ${JSON.stringify(config)}`);
       const res = await calendlyClient(config);
-      return res.data;
+      return res;
     },
     {
       retries: 3,
@@ -41,7 +45,7 @@ async function calendlyOAuthRequest(config) {
       );
 
       const res = await oauthClient(config);
-      return res.data;
+      return res;
     },
     {
       retries: 3,

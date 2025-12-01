@@ -95,7 +95,7 @@ const handleCallbackBusiness = async (query) => {
     // --- Fetch authenticated user (to get user URI) ---
     const userData = await fetchCurrentUser(tokens.access_token);
     if (!userData) {
-      logger.debug(`userData found for ID: ${id}`);
+      logger.error("No userData returned from Calendly");
       return sendResponse(false, 404, "userData not found", null);
     }
 
