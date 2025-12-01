@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      API_KEY: "API_KEY"
+      NODE_ENV: "SAMPLE_ENV"
+      MONGO_URI: "MONGO_URI"
+      PUBLIC_BASE_URL: "PUBLIC_BASE_URL"
+
+      CALENDLY_CLIENT_ID: "CALENDLY_CLIENT_ID"
+      CALENDLY_REDIRECT_URI: "CALENDLY_REDIRECT_URI"
+      CALENDLY_CLIENT_SECRET: "CALENDLY_CLIENT_SECRET"
+      CALENDLY_OAUTH_TOKEN_URL: "CALENDLY_OAUTH_TOKEN_URL"
+      CALENDLY_API_BASE: "CALENDLY_API_BASE"
+      CALENDLY_WEBHOOK_SIGNING_KEY: "CALENDLY_WEBHOOK_SIGNING_KEY"
+
+      REDIS_HOST: "REDIS_HOST"
+      REDIS_PORT: "PORT"
+      REDIS_PASSWORD: "REDIS_PASSWORD"
+
+      LOG_LEVEL: "LOG_LEVEL"
+    depends_on:
+      - mongo
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      API_KEY: "API_KEY"
+      NODE_ENV: "SAMPLE_ENV"
+      MONGO_URI: "MONGO_URI"
+      PUBLIC_BASE_URL: "PUBLIC_BASE_URL"
+
+      CALENDLY_CLIENT_ID: "CALENDLY_CLIENT_ID"
+      CALENDLY_REDIRECT_URI: "CALENDLY_REDIRECT_URI"
+      CALENDLY_CLIENT_SECRET: "CALENDLY_CLIENT_SECRET"
+      CALENDLY_OAUTH_TOKEN_URL: "CALENDLY_OAUTH_TOKEN_URL"
+      CALENDLY_API_BASE: "CALENDLY_API_BASE"
+      CALENDLY_WEBHOOK_SIGNING_KEY: "CALENDLY_WEBHOOK_SIGNING_KEY"
+
+      REDIS_HOST: "REDIS_HOST"
+      REDIS_PORT: "PORT"
+      REDIS_PASSWORD: "REDIS_PASSWORD"
+
+      LOG_LEVEL: "LOG_LEVEL"
+    depends_on:
+      - mongo
+      - redis
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  mongo_data:
