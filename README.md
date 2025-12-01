@@ -193,7 +193,7 @@ See `.env.example` for full details. Typical fields:
 
 ### BASE URL
 
-- PUBLIC_BASE_URL= https://a1f38591d993.ngrok-free.app
+- PUBLIC_BASE_URL= [https://calendlyintegration.onrender.com/](https://calendlyintegration.onrender.com/)
 
 ### CALENDLY CONFIG
 
@@ -344,7 +344,8 @@ GET /v1/auth/authorize
 }
 ```
 
-### 2. OAuth: Callback
+### 2. OAuth: Callback 
+- NOTE : PAST THE CODE RECEIVED FROM THE FIRST API TO UPDATE THE TOKENS IN DB (ONLY IF YOU DO NOT HAVE A UI to redirect itself)
 
 GET /v1/auth/callback?code=xxxx
 
