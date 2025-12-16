@@ -1,6 +1,6 @@
 # Calendly Integration Service
 
-A full backend microservice integrating with the Calendly API.  
+A full backend service integrating with the Calendly API.  
 This service implements OAuth2 authentication, event syncing, webhook processing, and asynchronous worker queues using BullMQ.
 
 ---
