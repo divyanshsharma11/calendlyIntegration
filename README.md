@@ -1,11 +1,11 @@
 # Calendly Integration Service
 
-A full backend microservice integrating with the Calendly API.  
+A full backend service integrating with the Calendly API.  
 This service implements OAuth2 authentication, event syncing, webhook processing, and asynchronous worker queues using BullMQ.
 
 ---
 
-## 📐 Architecture Diagram (ASCII)
+## 📐 Architecture Diagram
 
                       Calendly API
                           │
@@ -102,7 +102,12 @@ All webhook processing is delegated to a background worker.
 - Can scale workers independently later
 
 **Trade-off:**  
-Worker cannot be deployed on free Render tier → run locally.
+Previously the worker ran only locally due to Render’s free-tier limitations.
+Now the worker is fully deployed online as a dedicated Background Worker service, ensuring:
+
+- Continuous processing even when API restarts    
+- Production-grade async architecture
+- Correct isolation between API layer and worker layer
 
 ---
 
