@@ -117,7 +117,7 @@ const handleWebhookReceiveBusiness = async (payload) => {
       );
     }
 
-    await setCache(redisKey, true, 86400); // 24 hours TTL
+    await setCache(redisKey, true, 300); // 24 hours TTL
 
     logger.info(`Processing Calendly webhook for invitee: ${inviteeUuid}`);
 
