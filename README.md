@@ -308,7 +308,6 @@ Worker responsibilities:
 - Update events atomically
 - Mark webhook logs as processed
 
-## **Worker is run locally**, since Render workers require a paid plan.
 
 
 # 📘 Sample API Responses
