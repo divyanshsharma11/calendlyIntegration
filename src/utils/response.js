@@ -38,7 +38,7 @@ const errorFormat = (error) => {
     return {
       type: "ValidationError",
       message: messages.join(", "),
-      stack: error.stack || null,
+      // stack: error.stack || null,
     };
   }
 
@@ -51,7 +51,7 @@ const errorFormat = (error) => {
       type: "MongoDuplicateKeyError",
       message: `Duplicate value for field '${field}'`,
       field,
-      stack: error.stack || null,
+      // stack: error.stack || null,
     };
   }
 
@@ -63,7 +63,7 @@ const errorFormat = (error) => {
     return {
       type: error.name || "Error",
       message: error.message || "Unexpected server error",
-      stack: error.stack || null,
+      // stack: error.stack || null,
     };
   }
 
