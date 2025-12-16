@@ -5,7 +5,7 @@ This service implements OAuth2 authentication, event syncing, webhook processing
 
 ---
 
-## 📐 Architecture Diagram (ASCII)
+## 📐 Architecture Diagram
 
                       Calendly API
                           │
